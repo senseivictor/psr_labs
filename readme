@@ -1,0 +1,2 @@
+lsof -i :8080 // to see which process is using the port
+kill <PID> // to kill the process
