@@ -26,7 +26,7 @@ int main(int argc, char *argv[]) {
   configServer(&server_addr, port);
   int sv_desc = openTCPSocket();
   bindSocketToPort(sv_desc, &server_addr);
-  listen(sv_desc, 5);
+  listen(sv_desc, 5); // 5 e numarul maxim de elemente in queue;
 
   // am adaugat un loop global care tine serverul activ
   // si stinge doar conexiunea cu clientul curent, in loc sa se stinga si
