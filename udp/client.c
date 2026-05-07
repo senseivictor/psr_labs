@@ -41,47 +41,42 @@ int main(int argc, char *argv[]) {
 
   while (strcmp(buf, "quit\n") != 0) {
 
-    // Curățăm buffer-ul pentru a începe primirea unui nou răspuns
     memset(buf, 0, sizeof(buf));
 
-    // --- SECȚIUNEA RECEPȚIE (Așteptăm microfonul de la server) ---
-    // Citim pachete până când găsim prompt-ul ">>"
+    // --- RECEPȚIE ---
     while (strstr(buf, ">>") == NULL) {
       char temp[BUFSIZ];
       memset(temp, 0, BUFSIZ);
 
       n = read(cl_desc, temp, sizeof(temp) - 1);
-      if (n < 0)
-        ERROR("read");
-      if (n == 0)
-        break; // Serverul a închis (puțin probabil în UDP)
+      if (n <= 0) break; // Daca serverul moare sau eroare
 
       temp[n] = '\0';
       printf("%s", temp);
       fflush(stdout);
 
-      // Acumulăm în buf pentru a verifica dacă a venit ">>"
       strncat(buf, temp, sizeof(buf) - strlen(buf) - 1);
     }
 
-    // --- SECȚIUNEA TRANSMISIE (Avem microfonul) ---
+    // --- TRANSMISIE ---
 
-    // Cazul 1: Serverul ne-a cerut text multiline
-    if (strcmp(buf, prompts.text) == 0) {
-      // Resetăm buf[0] pentru a intra în bucla de scriere
+    // Verificam daca serverul ne-a trimis promptul de text (folosind strstr)
+    if (strstr(buf, prompts.text) != NULL) {
       buf[0] = '\0';
       while (buf[0] != '.') {
         if (fgets(buf, sizeof(buf), stdin) != NULL) {
-          if (write(cl_desc, buf, strlen(buf)) < 0)
-            ERROR("write");
+          write(cl_desc, buf, strlen(buf));
         }
       }
-    }
-    // Cazul 2: Comandă normală (o singură linie)
+    } 
     else {
       if (fgets(buf, sizeof(buf), stdin) != NULL) {
-        if (write(cl_desc, buf, strlen(buf)) < 0)
-          ERROR("write");
+        write(cl_desc, buf, strlen(buf));
+        
+        // VERIFICARE IEȘIRE: Dacă noi am tastat quit, ieșim acum
+        if (strcmp(buf, "quit\n") == 0) {
+          break; 
+        }
       }
     }
   }
