@@ -39,6 +39,9 @@ int main(int argc, char *argv[]) {
   // Inițializăm bufferul pentru a intra în buclă
   memset(buf, 0, sizeof(buf));
 
+  // "Spargem gheața" ca serverul să afle IP-ul nostru
+  write(cl_desc, "help\n", 5);
+
   while (strcmp(buf, "quit\n") != 0) {
 
     memset(buf, 0, sizeof(buf));
@@ -49,7 +52,8 @@ int main(int argc, char *argv[]) {
       memset(temp, 0, BUFSIZ);
 
       n = read(cl_desc, temp, sizeof(temp) - 1);
-      if (n <= 0) break; // Daca serverul moare sau eroare
+      if (n <= 0)
+        break; // Daca serverul moare sau eroare
 
       temp[n] = '\0';
       printf("%s", temp);
@@ -68,14 +72,13 @@ int main(int argc, char *argv[]) {
           write(cl_desc, buf, strlen(buf));
         }
       }
-    } 
-    else {
+    } else {
       if (fgets(buf, sizeof(buf), stdin) != NULL) {
         write(cl_desc, buf, strlen(buf));
-        
+
         // VERIFICARE IEȘIRE: Dacă noi am tastat quit, ieșim acum
         if (strcmp(buf, "quit\n") == 0) {
-          break; 
+          break;
         }
       }
     }
